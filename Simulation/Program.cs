@@ -26,6 +26,12 @@ class Program
             table.AddRow(criteria.Name, count.ToString("N0"), prevalence.ToString("F3") + "%");
         }
 
+        var both = patients.Count(p =>
+            new ConversionDisorderCriteria().MeetsCriteria(p) &&
+            new FunctionalNeurologicalDisorderCriteria1().MeetsCriteria(p));
+
+        table.AddRow("Both FND and CD", both.ToString("N0"), (both * 100.0 / total).ToString("F3") + "%");
+
         table.Write(Format.Minimal);
     }
 }
