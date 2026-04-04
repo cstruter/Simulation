@@ -14,13 +14,7 @@ class Program
     static readonly FunctionalNeurologicalDisorderCriteria2 Fnd2 = new();
     static readonly ConsoleTable Table = new("Criteria", "Cases", "Prevalence");
     static readonly ConcurrentBag<PatientPresentation> Patients = Generator.Generate(Total);
-    static readonly IDiagnosticCriteria[] Criterias =
-    [
-        Cd,
-        Fnd1,
-        Fnd2
-    ];
-
+    
     static void Main()
     {
         AllCriterias();
@@ -30,7 +24,13 @@ class Program
 
     static void AllCriterias()
     {
-        foreach (var criteria in Criterias)
+        IDiagnosticCriteria[] criterias =
+        [
+            Cd,
+            Fnd1,
+            Fnd2
+        ];
+        foreach (var criteria in criterias)
         {
             var count = Patients.Count(criteria.MeetsCriteria);
             AddRow(criteria.Name, count);
@@ -39,10 +39,7 @@ class Program
 
     static void BothFndAndCd()
     {
-        var count = Patients.Count(p =>
-            Cd.MeetsCriteria(p) &&
-            Fnd1.MeetsCriteria(p));
-
+        var count = Patients.Count(p => Cd.MeetsCriteria(p) && Fnd1.MeetsCriteria(p));
         AddRow("Both FND and CD", count);
     }
 
