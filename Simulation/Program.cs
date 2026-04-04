@@ -1,37 +1,59 @@
 ﻿using ConsoleTables;
 using Simulation.Criteria;
+using System.Collections.Concurrent;
 
 namespace Simulation;
 
 class Program
 {
-    const int total = 68_000_000;
-    static readonly PatientDataGenerator generator = new();
-    static readonly List<IDiagnosticCriteria> criterias =
+    const int Total = 68_000_000;
+
+    static readonly PatientDataGenerator Generator = new();
+    static readonly ConversionDisorderCriteria Cd = new();
+    static readonly FunctionalNeurologicalDisorderCriteria1 Fnd1 = new();
+    static readonly FunctionalNeurologicalDisorderCriteria2 Fnd2 = new();
+    static readonly ConsoleTable Table = new("Criteria", "Cases", "Prevalence");
+    static readonly ConcurrentBag<PatientPresentation> Patients = Generator.Generate(Total);
+    static readonly IDiagnosticCriteria[] Criterias =
     [
-        new ConversionDisorderCriteria(),
-        new FunctionalNeurologicalDisorderCriteria1(),
-        new FunctionalNeurologicalDisorderCriteria2()
+        Cd,
+        Fnd1,
+        Fnd2
     ];
 
     static void Main()
     {
-        var table = new ConsoleTable("Criteria", "Cases", "Prevalence");
-        var patients = generator.Generate(total);
+        AllCriterias();
+        BothFndAndCd();
+        Render();
+    }
 
-        foreach (var criteria in criterias)
+    static void AllCriterias()
+    {
+        foreach (var criteria in Criterias)
         {
-            var count = patients.Count(criteria.MeetsCriteria);
-            var prevalence = total > 0 ? (count * 100.0 / total) : 0;
-            table.AddRow(criteria.Name, count.ToString("N0"), prevalence.ToString("F3") + "%");
+            var count = Patients.Count(criteria.MeetsCriteria);
+            AddRow(criteria.Name, count);
         }
+    }
 
-        var both = patients.Count(p =>
-            new ConversionDisorderCriteria().MeetsCriteria(p) &&
-            new FunctionalNeurologicalDisorderCriteria1().MeetsCriteria(p));
+    static void BothFndAndCd()
+    {
+        var count = Patients.Count(p =>
+            Cd.MeetsCriteria(p) &&
+            Fnd1.MeetsCriteria(p));
 
-        table.AddRow("Both FND and CD", both.ToString("N0"), (both * 100.0 / total).ToString("F3") + "%");
+        AddRow("Both FND and CD", count);
+    }
 
-        table.Write(Format.Minimal);
+    static void AddRow(string name, int count)
+    {
+        var prevalence = Total > 0 ? (count * 100.0 / Total) : 0;
+        Table.AddRow(name, count.ToString("N0"), $"{prevalence:F3}%");
+    }
+
+    static void Render()
+    {
+        Table.Write(Format.Minimal);
     }
 }
