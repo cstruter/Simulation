@@ -24,5 +24,3 @@ The goal is to illustrate how small changes in diagnostic rules — particularly
 - `PatientPresentation` class modelling key clinical traits
 - Easy to modify parameters for sensitivity analysis
 - Console output with summary statistics
-
-## Repository Structure
